@@ -1,0 +1,300 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\geometry{margin=1in}
+
+\titleformat{\section}{\bfseries\Large}{\thesection.}{1em}{}
+\titleformat{\subsection}{\bfseries\normalsize}{\thesubsection}{1em}{}
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\begin{center}
+{\Large \textbf{Phase 2 Submission}}\\[6pt]
+{\large \textbf{Deep Learning for Stock Price Prediction}}\\[12pt]
+\textbf{Team Members}
+\end{center}
+
+\begin{center}
+\begin{tabular}{|m{1cm}|m{5cm}|m{5cm}|}
+\hline
+\textbf{S. No.} & \textbf{Name} & \textbf{ID Number} \\
+\hline
+1 & Ritesh Udgata & 2023AAPS0206H \\
+\hline
+2 & Dhairya Luthra & 2022A7PS1377H \\
+\hline
+3 & Paras Jain & 2023A7PS1062H \\
+\hline
+4 & Karandeep Singh Sodhi & 2022A7PS1383H \\
+\hline
+5 & Ankur Sarkar & 2023A8PS0511H \\
+\hline
+6 & Parth Gupta & 2023B4AD0741H \\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{1cm}
+
+\section{Introduction}
+Stock price prediction is difficult because financial time series are volatile, nonlinear and driven by many hidden factors. Classical models such as ARIMA and SARIMA assume linearity and constant variance which is often not true in real markets. These limitations have motivated the use of deep learning models that can learn hierarchical temporal features, work directly on multivariate OHLCV inputs and combine market level signals with stock specific history. This document presents a literature style writeup based on six modern deep learning approaches that use attention, CNN--LSTM hybrids, transformer style cross stock modeling and residual learning to improve prediction quality.
+
+\section{Evolution of Approaches}
+
+\subsection{Traditional Methods and Their Limitations}
+ARIMA based models were widely used since they provide interpretable autoregressive and moving average components. However they
+\begin{itemize}
+  \item assume a stationary series that is often achieved only after differencing,
+  \item model linear relations which ignore nonlinear price moves,
+  \item do not fuse exogenous factors such as sentiment or sector level trends.
+\end{itemize}
+The Efficient Market Hypothesis argued that future prices cannot be inferred from past data alone, but later machine learning studies showed that with richer features and nonlinear models it is possible to extract weak yet tradable signals.
+
+\subsection{Transition to Deep Learning}
+Deep learning allows end to end representation learning from raw market sequences. CNN layers capture local temporal patterns, LSTMs capture long horizon dependencies and attention mechanisms reweight important days. Transformers further enable modeling of relations across multiple stocks and across non aligned time steps. This transition has made it possible to work with large time windows and high dimensional indicator sets.
+
+\section{Detailed Paper Analysis}
+
+\subsection{Attention based CNN--LSTM and XGBoost (AttCLX)}
+\textbf{Authors:} Zhuangwei Shi, Yang Hu, Guangliang Mo, Jian Wu.
+
+\textbf{Architecture:}
+\begin{itemize}
+  \item ARIMA preprocessing with p=2, d=1, q=0 to improve stationarity.
+  \item Attention based CNN encoder with multi head mechanism (4 heads) to capture local and global dependencies.
+  \item 5 layer bidirectional LSTM decoder with hidden size 64 for long distance correspondence.
+  \item XGBoost regressor as a fine tuning stage to refine the learned deep features.
+\end{itemize}
+
+The attention uses scaled dot product
+\[
+s(x_i, q) = \frac{x_i^{T} q}{\sqrt{d}}, \qquad \alpha_i = \text{softmax}(s(x_i,q))
+\]
+which lets the network focus on the most informative days.
+
+\textbf{Dataset and Setup:}
+\begin{itemize}
+  \item Bank of China stock 601988.SH from 2007-01-01 to 2022-03-31 taken from Tushare.
+  \item Features: open, close, high, low, volume, amount.
+  \item Train/test split on 2021-06-22 resulting in 3500 train and 180 test samples.
+  \item Look back window 20 days, batch 32, 50 epochs, dropout 0.3, Adam with lr=0.01, GPU GTX2070.
+\end{itemize}
+
+\textbf{Results:}
+\begin{itemize}
+  \item MAE=0.01126, RMSE=0.01424, MAPE=0.01126, $R^{2}=0.88342$.
+  \item Compared to ARIMA (MAE=0.02368, $R^{2}=0.74402$) there was about 52.5\% MAE reduction and 18.7\% $R^{2}$ improvement.
+  \item Outperformed ARIMA--NN, LSTM--KF and Transformer--KF baselines.
+\end{itemize}
+
+\textbf{Key Idea:} combine statistical preprocessing, deep temporal feature extraction and tree based fine tuning so that both linear and nonlinear structure in prices is captured.
+
+\subsection{CLAM: CNN--LSTM--Attention Mechanism}
+\textbf{Authors:} Nguyen Quoc Anh, Phan Thi Quynh Nhu.
+
+\textbf{Architecture:}
+\begin{itemize}
+  \item Input window of 60 trading days with 5 OHLCV features.
+  \item 3 Conv1D layers (128 filters, kernel 3, ReLU) for spatial and local temporal feature extraction.
+  \item 3 LSTM layers (200 units) stacked for deeper temporal modeling.
+  \item Attention implemented as a dense layer that learns importance weights.
+  \item Dropout 0.3 after each block to control overfitting.
+\end{itemize}
+
+\textbf{Dataset:}
+\begin{itemize}
+  \item Yahoo Finance data for S\&P 500 stocks.
+  \item Evaluated on ABBV, JNJ, GS and C representing Pharma and Financial sectors.
+  \item Period: 19 July 2004 to 12 July 2024.
+  \item Split 80:10:10 for train, validation and test.
+\end{itemize}
+
+\textbf{Training:}
+Hyperparameters such as LSTM units, Conv1D filters, kernel sizes, dropout and learning rate were tuned. Best setting was 200 LSTM units, 128 filters, kernel 3, dropout 0.3, batch 64, Adam lr=0.001.
+
+\textbf{Results:}
+\begin{itemize}
+  \item ABBV test MAE=0.007, RMSE=0.012 with more than 80\% error reduction over standalone baselines.
+  \item Trend prediction accuracy about 75\% on average with ability to capture opening day downturns.
+\end{itemize}
+
+\textbf{Contribution:} a clean stacked CNN+LSTM+attention pipeline that works on long windows (60 days) and performs multi step forecasting for 7 future days.
+
+\subsection{MASTER: Market Guided Stock Transformer}
+\textbf{Authors:} Tong Li, Zhaoyang Liu, Yanyan Shen, Xue Wang, Haokun Chen, Sen Huang.
+
+\textbf{Motivation:} correlations between stocks are dynamic and sometimes appear at misaligned time steps. A model must therefore look both within a stock sequence and across different stocks on the same day.
+
+\textbf{Architecture Stages:}
+\begin{enumerate}
+  \item Market guided gating that takes a market status vector $m_{\tau}$ (built from index prices and volumes over several days) and produces scaling coefficients
+  \[
+  \alpha(m_{\tau}) = F \cdot \text{softmax}_{\beta}(W_{\alpha} m_{\tau} + b_{\alpha})
+  \]
+  so that feature dimensions are reweighted according to current market conditions.
+  \item Intra stock aggregation using a transformer encoder with multi head attention to connect time steps of the same stock.
+  \item Inter stock aggregation where for a given time step embeddings of all stocks attend to each other in order to model momentary correlations.
+  \item Temporal aggregation where the latest embedding queries historical embeddings to produce a final stock representation.
+  \item Prediction head for return ratio ranking.
+\end{enumerate}
+
+\textbf{Dataset:}
+\begin{itemize}
+  \item CSI300 and CSI800 Chinese stock universes.
+  \item Features from Alpha158 plus market representation features.
+  \item Train: 2008 Q1 to 2020 Q1, validation: 2020 Q2, test: 2020 Q3 to 2022 Q4.
+\end{itemize}
+
+\textbf{Results:}
+\begin{itemize}
+  \item On CSI300: IC=0.064, ICIR=0.42, RankIC=0.076, RankICIR=0.49, AR=0.27, IR=2.4.
+  \item Achieved about 13\% improvement in ranking metrics and 47\% in portfolio metrics over second best baselines such as XGBoost, DTML and GAT.
+  \item Time complexity $O(N_{2} M^{2} \tau D^{2})$ which is lower than a naive $M \times \tau$ attention.
+\end{itemize}
+
+\textbf{Key Idea:} learn which stock level features are effective under a particular market regime and then mine cross time and cross stock relations through attention.
+
+\subsection{ResNLS: Residual Network with LSTM}
+\textbf{Authors:} Yuanzhe Jia, Ali Anaissi, Basem Suleiman.
+
+\textbf{Architecture:}
+\begin{itemize}
+  \item Residual CNN block with two 1D convolution layers (64 filters, kernel 3, ReLU, batch norm, dropout, weight decay).
+  \item Output of the residual block is added elementwise to the original input which preserves low level price information.
+  \item LSTM layer with hidden size 32 consumes the enhanced sequence and produces final prediction.
+\end{itemize}
+
+\textbf{Datasets:}
+\begin{itemize}
+  \item SSE Composite Index (train 2011--2020, test 2021).
+  \item CSI300 Index (train 2009--2018, test 2019).
+  \item Data obtained via Tushare.
+\end{itemize}
+
+\textbf{Training:}
+Adam lr=1e-3, batch 64, 50 epochs, weight decay 1e-5, dropout retain prob 0.8.
+
+\textbf{Findings:}
+\begin{itemize}
+  \item Input window of 5 days (ResNLS-5) worked best after trying 3, 5, 10, 20, 40, 60 days.
+  \item On SSE: MAE=28.08, MSE=1350.16, RMSE=36.74 which is about 20 percent better than many baselines.
+  \item On CSI300: MAE=37.34, RMSE=52.56 beating vanilla LSTM by 31.7 percent MAE reduction.
+  \item In a backtesting setup the ResNLS-5 strategy achieved ARR=11.14 percent on SSE vs benchmark 3.91 percent and ARR=53.15 percent on CSI300 vs benchmark 37.95 percent.
+\end{itemize}
+
+\textbf{Key Idea:} bring residual learning from computer vision into financial time series so that local day to day dependencies are emphasized and gradients flow easily.
+
+\subsection{CNN--LSTM Sliding Window Model}
+A separate CNN--LSTM sliding window document was referenced but the source file was empty or not properly formatted so a detailed analysis could not be included. This is a limitation in the present survey.
+
+\section{Comparative Analysis Across Papers}
+
+\subsection{Architectural Trends}
+\begin{center}
+\begin{tabular}{|p{3cm}|p{5cm}|p{4cm}|}
+\hline
+\textbf{Model} & \textbf{Core Architecture} & \textbf{Key Innovation} \\
+\hline
+AttCLX & ARIMA + Attention CNN + BiLSTM + XGBoost & Hybrid statistical and deep model with fine tuning \\
+\hline
+CLAM & CNN + LSTM + Attention & Multi step 7 day forecasting on long windows \\
+\hline
+MASTER & Transformer with market guided gating & Cross time and cross stock correlation modeling \\
+\hline
+ResNLS & Residual CNN + LSTM & Emphasis on adjacent dependencies through residual links \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Performance Summary}
+\begin{itemize}
+  \item AttCLX on Bank of China: MAE=0.01126, RMSE=0.01424, $R^{2}=0.88342$.
+  \item CLAM on ABBV: test MAE=0.007, RMSE=0.033 with large gains over LSTM--AM.
+  \item MASTER on CSI300: IC=0.064, RankIC=0.076, IR about 2.4.
+  \item ResNLS-5 on SSE: MAE=28.08 with about 20 to 40 percent improvement over several deep baselines.
+\end{itemize}
+
+\subsection{Data Preprocessing}
+\begin{itemize}
+  \item AttCLX uses ARIMA(2,1,0) type differencing validated through ADF test (p\textless0.05) to obtain stationarity.
+  \item ResNLS applies MinMax scaling so that CNN and LSTM can work on normalized inputs.
+  \item MASTER normalizes return ratios using daily Z score to focus on ranking rather than raw price.
+  \item Feature engineering in MASTER uses Alpha158 indicators plus 63 dimensional market representation across CSI indices.
+\end{itemize}
+
+\subsection{Training Strategies}
+\begin{itemize}
+  \item Adam is used in all models.
+  \item Dropout in the range 0.3 to 0.5 and batch normalization or weight decay are common.
+  \item Early stopping or ReduceLROnPlateau is used in MASTER to stop at 40 epochs.
+  \item Hardware requirements range from a single 8 GB GPU (AttCLX) up to more demanding setups for transformer based models.
+\end{itemize}
+
+\subsection{Lookback Window Choice}
+\begin{itemize}
+  \item AttCLX: 20 days
+  \item MASTER: 8 days
+  \item CLAM: 60 days
+  \item ResNLS: 5 days found best
+\end{itemize}
+This shows that optimal window size is model specific and depends on how effectively the network can compress long sequences.
+
+\section{Key Innovations and Contributions}
+
+\subsection{Attention Mechanisms}
+All strong models integrate attention to dynamically focus on important time steps or important stocks. AttCLX and CLAM do this inside a CNN--LSTM stack, MASTER uses attention both within and across stocks.
+
+\subsection{Hybrid Modeling}
+AttCLX is a good example of blending linear statistical structure (ARIMA) with nonlinear deep structure (ACNN, BiLSTM) and finally tree ensembles (XGBoost). This gives robustness across different market regimes.
+
+\subsection{Market Guided Learning}
+MASTER introduces market guided gating which automatically scales feature dimensions based on market status. This removes the need for hand crafted feature selection whenever volatility or liquidity changes.
+
+\subsection{Cross Time Correlation Modeling}
+MASTER explicitly mines correlations that do not line up in time which is realistic since upstream and downstream firms may react with delays. Visualizations in the paper confirmed that these correlations are sparse and scattered.
+
+\subsection{Residual Learning for Time Series}
+ResNLS adapts the ResNet idea for 1D time series so that the model can learn local dependencies without gradient problems and with better computational performance.
+
+\section{Evaluation Methodologies}
+
+\subsection{Ranking Metrics}
+MASTER uses financial metrics such as IC and RankIC that measure monotonic association between predicted and actual returns averaged daily. ICIR and RankICIR further normalize these scores by standard deviation.
+
+\subsection{Portfolio Based Metrics}
+To show trading relevance MASTER selects top 30 stocks with highest predicted return ratio and evaluates Excess Annualized Return (AR) and Information Ratio (IR). ResNLS also reports Annualized Rate of Return from a simple trading strategy and shows large gains over benchmark indices.
+
+\subsection{Regression Metrics}
+AttCLX, CLAM and ResNLS primarily use MAE, RMSE, MSE and $R^{2}$. These are standard in time series forecasting and make model to model comparison straightforward.
+
+\subsection{Trend Accuracy}
+CLAM adds directional accuracy (UP or DOWN). Achieving 75 percent directional accuracy on real stocks with 20 year data is a strong result because it shows the model is not only fitting prices but also capturing turning points.
+
+\section{Dataset Characteristics and Availability}
+
+\subsection{Chinese Markets}
+AttCLX, MASTER and ResNLS use Tushare sourced data for CSI300, CSI800 and SSE where rich indicators and long historical spans are available.
+
+\subsection{US Markets}
+CLAM uses Yahoo Finance for S\&P 500 constituents split by sectors. This makes the model more generalizable across different business cycles.
+
+\subsection{Data Splits}
+\begin{itemize}
+  \item AttCLX: train till June 2021, test till March 2022.
+  \item CLAM: 80:10:10 split.
+  \item MASTER: long training from 2008 to 2020, test 2020 to 2022.
+  \item ResNLS: decade long training followed by one year test.
+\end{itemize}
+
+\section{Conclusion}
+Across the surveyed works a few themes are consistent. First, pure LSTM or pure CNN is no longer enough for competitive stock prediction. Second, attention and gating mechanisms that reweight features and time steps provide clear gains. Third, hybrid pipelines that combine classical differencing, deep representations and ensemble regressors achieve the lowest errors. Finally, evaluation must go beyond MAE and RMSE to include ranking and portfolio metrics in order to assess whether the predictions are actually tradable.
+
+\end{document}
