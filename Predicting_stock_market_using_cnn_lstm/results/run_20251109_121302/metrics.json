@@ -1,0 +1,37 @@
+{
+    "timestamp": "20251109_121302",
+    "model_architecture": {
+        "total_params": 287101,
+        "input_shape": [
+            100,
+            1
+        ],
+        "epochs_trained": 26,
+        "batch_size": 32
+    },
+    "training_metrics": {
+        "final_train_loss": 0.0003189522831235081,
+        "final_val_loss": 0.0003162990906275809,
+        "final_train_mae": 0.012718379497528076,
+        "final_val_mae": 0.011984177865087986,
+        "best_epoch": 26
+    },
+    "test_metrics": {
+        "mse": 0.00030885258370017514,
+        "mae": 0.011744434586404279,
+        "r2_score": 0.9818982761750423,
+        "rmse": 0.01757420222087407
+    },
+    "accuracy_margins": {
+        "1_percent": 7.054263565891474,
+        "2_percent": 13.488372093023257,
+        "5_percent": 31.085271317829456,
+        "10_percent": 53.100775193798455
+    },
+    "data_info": {
+        "total_samples": 6446,
+        "train_samples": 5156,
+        "test_samples": 1290,
+        "window_size": 100
+    }
+}

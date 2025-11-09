@@ -1,0 +1,50 @@
+======================================================================
+CNN-LSTM STOCK PREDICTION MODEL - EXPERIMENT RESULTS
+======================================================================
+
+Run Timestamp: 20251109_121302
+Data File: data.csv
+
+MODEL ARCHITECTURE
+----------------------------------------------------------------------
+Total Parameters: 287,101
+Input Shape: [100, 1]
+Window Size: 100 days
+
+TRAINING CONFIGURATION
+----------------------------------------------------------------------
+Epochs Trained: 26
+Batch Size: 32
+Training Samples: 5156
+Test Samples: 1290
+
+TRAINING PERFORMANCE
+----------------------------------------------------------------------
+Final Training Loss (MSE): 0.000319
+Final Validation Loss (MSE): 0.000316
+Final Training MAE: 0.012718
+Final Validation MAE: 0.011984
+
+TEST SET EVALUATION
+----------------------------------------------------------------------
+Mean Squared Error: 0.000309
+Root Mean Squared Error: 0.017574
+Mean Absolute Error: 0.011744
+R² Score: 0.981898
+
+PREDICTION ACCURACY MARGINS
+----------------------------------------------------------------------
+Within  1% error: 7.05%
+Within  2% error: 13.49%
+Within  5% error: 31.09%
+Within 10% error: 53.10%
+
+FILES SAVED
+----------------------------------------------------------------------
+- model.h5 (trained model)
+- training_history.png
+- predictions.png
+- error_distribution.png
+- metrics.json
+- summary.txt
+======================================================================
