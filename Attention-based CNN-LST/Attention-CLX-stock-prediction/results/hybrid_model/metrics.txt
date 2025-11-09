@@ -1,0 +1,6 @@
+Hybrid Attention-based CNN-LSTM Model Evaluation Metrics
+==================================================
+MSE: 0.01150
+RMSE: 0.10725
+MAE: 0.09813
+R2: -5.60957
