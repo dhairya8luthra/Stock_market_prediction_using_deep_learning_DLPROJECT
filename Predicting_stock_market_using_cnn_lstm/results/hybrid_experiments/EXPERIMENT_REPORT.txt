@@ -1,0 +1,45 @@
+Hybrid Attention + CNN-LSTM + XGBoost Report
+Date: 2025-11-09 20:40:05
+Selected stocks: RELIANCE, TCS, INFY, HDFCBANK, SBIN
+Windows: Branch1=20, Branch2=60, Stage1Epochs=8
+Justification: We combined attention-enhanced ARIMA-conditioned features with CNN-LSTM temporal embeddings and applied a boosting-based finetuning stage to capture residual nonlinearity.
+Per-stock metrics (Neural vs Hybrid):
+- RELIANCE: NN(RMSE=170.39, MAE=102.72, R2=0.8071) | Hybrid(RMSE=94.61, MAE=60.08, R2=0.9405)
+- TCS: NN(RMSE=670.41, MAE=435.52, R2=-0.9819) | Hybrid(RMSE=292.34, MAE=184.03, R2=0.6231)
+- INFY: NN(RMSE=923.01, MAE=883.81, R2=-15.8108) | Hybrid(RMSE=272.29, MAE=231.43, R2=-0.4630)
+- HDFCBANK: NN(RMSE=635.47, MAE=383.33, R2=-1.1592) | Hybrid(RMSE=161.26, MAE=81.02, R2=0.8610)
+- SBIN: NN(RMSE=531.82, MAE=499.71, R2=-109.1836) | Hybrid(RMSE=48.91, MAE=36.96, R2=0.0679)
+
+Averages across stocks:
+- RMSE: NN=586.22 → Hybrid=173.88
+- MAE:  NN=461.02 → Hybrid=118.70
+- R²:   NN=-25.2657 → Hybrid=0.4059
+
+Artifacts saved:
+- Metrics CSV: results\hybrid_experiments\hybrid_comparison_metrics.csv
+- Comparison plot: results\hybrid_experiments\hybrid_vs_neural.png
+- Embeddings: results\hybrid_experiments\RELIANCE_train_embed.npy and results\hybrid_experiments\RELIANCE_test_embed.npy
+- Embeddings: results\hybrid_experiments\TCS_train_embed.npy and results\hybrid_experiments\TCS_test_embed.npy
+- Embeddings: results\hybrid_experiments\INFY_train_embed.npy and results\hybrid_experiments\INFY_test_embed.npy
+- Embeddings: results\hybrid_experiments\HDFCBANK_train_embed.npy and results\hybrid_experiments\HDFCBANK_test_embed.npy
+- Embeddings: results\hybrid_experiments\SBIN_train_embed.npy and results\hybrid_experiments\SBIN_test_embed.npy
+
+
+---
+Tuned XGBoost Results (vs Base)
+- RELIANCE: RMSE 94.61 → 101.87, MAE 60.08 → 62.16, R² 0.9405 → 0.9310; params={"objective": "reg:squarederror", "eta": 0.05, "max_depth": 5, "subsample": 0.8, "colsample_bytree": 0.8, "seed": 42}
+- TCS: RMSE 292.34 → 296.78, MAE 184.03 → 186.42, R² 0.6231 → 0.6116; params={"objective": "reg:squarederror", "eta": 0.03, "max_depth": 4, "subsample": 0.9, "colsample_bytree": 0.7, "seed": 42}
+- INFY: RMSE 272.29 → 806.38, MAE 231.43 → 755.36, R² -0.4630 → -11.8308; params={"objective": "reg:squarederror", "eta": 0.05, "max_depth": 4, "subsample": 0.8, "colsample_bytree": 0.7, "seed": 42}
+- HDFCBANK: RMSE 161.26 → 121.33, MAE 81.02 → 64.49, R² 0.8610 → 0.9213; params={"objective": "reg:squarederror", "eta": 0.03, "max_depth": 5, "subsample": 0.8, "colsample_bytree": 0.8, "seed": 42}
+- SBIN: RMSE 48.91 → 45.78, MAE 36.96 → 32.70, R² 0.0679 → 0.1834; params={"objective": "reg:squarederror", "eta": 0.05, "max_depth": 5, "subsample": 0.9, "colsample_bytree": 0.7, "seed": 42}
+
+
+---
+Normalized Error Metrics (scale-independent)
+- RELIANCE: nRMSE_mean NN=12.30% Base=6.83% Tuned=7.35% | MAPE/Proxy NN=7.10% Base=4.34% Tuned=4.49% | nRMSE_range NN=11.04% Base=6.13% Tuned=6.60%
+- TCS: nRMSE_mean NN=28.58% Base=12.46% Tuned=12.65% | MAPE/Proxy NN=15.89% Base=7.85% Tuned=7.95% | nRMSE_range NN=34.08% Base=14.86% Tuned=15.09%
+- INFY: nRMSE_mean NN=98.50% Base=29.06% Tuned=86.05% | MAPE/Proxy NN=95.78% Base=24.70% Tuned=80.61% | nRMSE_range NN=100.91% Base=29.77% Tuned=88.16%
+- HDFCBANK: nRMSE_mean NN=37.97% Base=9.63% Tuned=7.25% | MAPE/Proxy NN=30.07% Base=4.84% Tuned=3.85% | nRMSE_range NN=36.79% Base=9.34% Tuned=7.02%
+- SBIN: nRMSE_mean NN=190.32% Base=17.50% Tuned=16.38% | MAPE/Proxy NN=183.15% Base=13.23% Tuned=11.70% | nRMSE_range NN=201.18% Base=18.50% Tuned=17.32%
+
+Interpretation: Normalized metrics show hybrid models reduce relative error drastically (e.g., SBIN nRMSE_mean drops from >190% to ~16%). INFY remains challenging; consider outlier filtering and regime-specific models. HDFCBANK gains most from tuning.

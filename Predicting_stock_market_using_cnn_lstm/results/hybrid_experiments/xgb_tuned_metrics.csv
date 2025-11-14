@@ -1,0 +1,6 @@
+stock,base_rmse,tuned_rmse,base_mae,tuned_mae,base_r2,tuned_r2,params
+RELIANCE,94.60573073760322,101.86523559638029,60.07772723679316,62.16036564127604,0.9405192848613166,0.9310406307897247,"{""objective"": ""reg:squarederror"", ""eta"": 0.05, ""max_depth"": 5, ""subsample"": 0.8, ""colsample_bytree"": 0.8, ""seed"": 42}"
+TCS,292.3424244338144,296.77546404730543,184.03275026807597,186.42023548799403,0.6231348314751483,0.6116187127454709,"{""objective"": ""reg:squarederror"", ""eta"": 0.03, ""max_depth"": 4, ""subsample"": 0.9, ""colsample_bytree"": 0.7, ""seed"": 42}"
+INFY,272.2906713618147,806.379430643095,231.43324462890627,755.3635168805804,-0.4629836151255471,-11.830772924658723,"{""objective"": ""reg:squarederror"", ""eta"": 0.05, ""max_depth"": 4, ""subsample"": 0.8, ""colsample_bytree"": 0.7, ""seed"": 42}"
+HDFCBANK,161.25630562089276,121.32896708596067,81.02272786458332,64.49042047409785,0.8609612646472476,0.9212897307944274,"{""objective"": ""reg:squarederror"", ""eta"": 0.03, ""max_depth"": 5, ""subsample"": 0.8, ""colsample_bytree"": 0.8, ""seed"": 42}"
+SBIN,48.914610204112606,45.78335515505525,36.9576614873977,32.69861665562222,0.06790602460447126,0.18342187999680992,"{""objective"": ""reg:squarederror"", ""eta"": 0.05, ""max_depth"": 5, ""subsample"": 0.9, ""colsample_bytree"": 0.7, ""seed"": 42}"
